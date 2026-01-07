@@ -1,8 +1,9 @@
 {
 	"name": "@scicave/math-latex-parser",
-	"version": "2.2.2",
+	"version": "3.0.0",
 	"description": "A mathematical (La)TeX parser.",
-	"main": "./lib/index.js",
+	"main": "./index.js",
+	"types": "./index.d.ts",
 	"targets": {
 		"web": {
 			"source": "./src/browser-index.js",

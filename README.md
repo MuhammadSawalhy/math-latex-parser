@@ -1,334 +1,154 @@
 # math-latex-parser
-A mathematical parser for latex in math mode. We mean by mathematical that, arithmetic operations are considered. For example, if you pass "1+2", the result would by a (add node "+") with two children nodes of type number.
 
-**See also:** [math-parser](https://github.com/scicave/math-parser).
+A powerful (La)TeX mathematical expression parser. Unlike simple string-based parsers, it generates a full Abstract Syntax Tree (AST) while respecting mathematical operator precedence and associativity.
 
 ## Install
 
-```
+```bash
 npm i @scicave/math-latex-parser
 ```
 
 ## Usage
 
-Browser
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/@scicave/math-latex-parser/lib/bundle.js"></script>
-<!-- or -->
-<script src="https://cdn.jsdelivr.net/npm/@scicave/math-latex-parser/lib/bundle.min.js"></script>
-```
-
--------------------
+### Node.js / Bundlers
 
 ```js
-console.log(parse(tex, options));
-```
+const { parse } = require('@scicave/math-latex-parser');
 
-```js
-const {parse} = require('@scicave/math-latex-parser'); 
-console.log(parse('12+3^6x \\frac 1 {5+3}'));
-```
+// Basic arithmetic
+const ast = parse('1 + 2 * 3^2');
+
+// Complex LaTeX
+const tex = String.raw`\int_{0}^{\pi} \sin(x) dx + \frac{1}{2}`;
+const ast2 = parse(tex);
+
+### Visualizing the AST
+
+For an expression like `12+3^6x \frac 1 {5+3}`, the parser generates a structured tree:
 
 ![AST](./assets/AST.png)
-
-## Contribute
-
-Feel free to refactor code, enhance the performance,
-suggest better AST structure. I love open-source stuff ❤️.
-
-See `(package.json).scripts`.
-
-```sh
-❯ npm install
-❯ npm start # watch and built
-❯ # open another terminal:
-❯ npm run test:watch # test after builing
 ```
 
-## Operators Schema
+### Browser
 
-<table>
-  <thead>
-    <tr>
-      <td><strong>Operator</strong></td>
-      <td><strong>Precedence</strong></td>
-      <td><strong>Associativity</strong></td>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>!</code></td>
-      <td>5</td>
-      <td>N/A</td>
-    </tr>
-    <tr>
-      <td><code>^</code></td>
-      <td>4</td>
-      <td>left-to-right</td>
-    </tr>
-    <tr>
-      <td><code>*</code></td>
-      <td rowspan="2">3</td>
-      <td rowspan="2">left-to-right</td>
-    </tr>
-    <tr>
-      <td><code>/</code></td>
-    </tr>
-    <tr>
-      <td><code>+</code></td>
-      <td rowspan="2">2</td>
-      <td rowspan="2">left-to-right</td>
-    </tr>
-    <tr>
-      <td><code>-</code></td>
-    </tr>
-    <tr>
-      <td><code>=</code></td>
-      <td rowspan="100">1</td>
-      <td rowspan="100">left-to-right</td>
-    </tr>
-    <tr>
-      <td><code>\neq</code></td>
-    </tr>
-    <tr>
-      <td><code>\approx</code></td>
-    </tr>
-    <tr>
-      <td><code>\eqsim</code></td>
-    </tr>
-    <tr>
-      <td><code>\simeq</code></td>
-    </tr>
-    <tr>
-      <td><code>\ge</code></td>
-    </tr>
-    <tr>
-      <td><code>\geq</code></td>
-    </tr>
-    <tr>
-      <td><code>\geqq</code></td>
-    </tr>
-    <tr>
-      <td><code>\geqslant</code></td>
-    </tr>
-    <tr>
-      <td><code>\gg</code></td>
-    </tr>
-    <tr>
-      <td><code>\ggg</code></td>
-    </tr>
-    <tr>
-      <td><code>\gggtr</code></td>
-    </tr>
-    <tr>
-      <td><code>\le</code></td>
-    </tr>
-    <tr>
-      <td><code>\leq</code></td>
-    </tr>
-    <tr>
-      <td><code>\leqq</code></td>
-    </tr>
-    <tr>
-      <td><code>\leqslant</code></td>
-    </tr>
-    <tr>
-      <td><code>\ll</code></td>
-    </tr>
-    <tr>
-      <td><code>\lll</code></td>
-    </tr>
-    <tr>
-      <td><code>\llless</code></td>
-    </tr>
-    <tr>
-      <td><code>\notin</code></td>
-    </tr>
-    <tr>
-      <td><code>\ni</code></td>
-    </tr>
-    <tr>
-      <td><code>\in</code></td>
-    </tr>
-    <tr>
-      <td><code>\isin</code></td>
-    </tr>
-  </tbody>
-</table>
+```html
+<script src="https://cdn.jsdelivr.net/npm/@scicave/math-latex-parser/lib/bundle.min.js"></script>
+<script>
+  const ast = mathLatexParser.parse("x^2 + y^2 = r^2");
+</script>
+```
 
-## AST Node
+---
 
-The `parse` function returns a `Node`, which may have array of other `Node`s in its `args`.
+## Features
 
-### Node.prototype.type
+- **Arithmetic Operations**: Full support for addition, subtraction, multiplication, division, powers, and factorials.
+- **Unary Prefix Operators**: Correct handling of `+`, `-`, `\pm`, `\mp`, `\neg`, and `\lnot`.
+- **LaTeX Commands**: Supports `\frac`, `\sqrt`, `\sum`, `\prod`, `\int`, `\operatorname`, and more.
+- **Automatic Multiplication**: Intelligently handles implicit multiplication like `2x` or `(a+b)(c+d)`.
+- **Extended Math Structures**: Support for:
+  - **Matrices**: `\begin{matrix} 1 & 2 \\ 3 & 4 \end{matrix}`
+  - **Sets**: `\{ 1, 2, 3 \}`
+  - **Tuples**: `(1, 2, 3)`
+  - **Intervals**: `[a, b)`, `(0, \infty)`
+  - **Absolute Value**: `|x|` or `\left| x \right|`
+- **Ellipsis**: Support for `...`, `\dots`, `\cdots`, etc. inside sets, matrices, and series.
 
-The `Node` type, see the [available types](#nodetypes).
+---
 
-### Node.prototype.check(props: Object, checkArgs=false)
+## Operator Precedence
 
-This method can check all properties except `args`, it will be ignored. Args will be checked if the 2nd arg (`checkArgs`) passed to `check` is `true`.
+| Operator                                   | Type       | Precedence | Associativity |
+| :----------------------------------------- | :--------- | :--------- | :------------ |
+| `^`                                        | Infix      | 7          | Left-to-Right |
+| `!`                                        | Postfix    | 6          | N/A           |
+| Implicit Mult                              | Automult   | 5          | Left-to-Right |
+| `+`, `-`, `\pm`, `\mp`, `\neg`, `\lnot`    | **Prefix** | 4          | N/A           |
+| `*`, `/`, `\cdot`                          | Infix      | 3          | Left-to-Right |
+| `+`, `-`                                   | Infix      | 2          | Left-to-Right |
+| `=`, `\neq`, `\approx`, `\le`, `\in`, etc. | Infix      | 1          | Left-to-Right |
+
+---
+
+## Parser Options
+
+The `parse(tex, options)` function accepts an optional configuration object.
 
 ```js
-let node = mathLatexParser.parse("\\alpha!");
-console.log(node.check({
-  type: "operator",
-  operatorType: "postfix",
-  name: "!"
-}));
-// true
-```
-
-### Node.prototype.checkType(type: string)
-
-You can check for `type` directly here, but why not `node.type === "the_type"`?
-Because `"the_type"` is not a valid type, `.checkType` will throw if you passed invalid type.
-
-```js
-let node = mathLatexParser.parse("1");
-console.log(node.checkType("member expression"));
-// false
-```
-
-### Node.prototype.hasChild(props: Object, checkArgs=false)
-
-This method can check all properties except `args`, it will be ignored. Args will be checked if the 2nd arg (`checkArgs`) passed to `check` is `true`.
-
-```js
-let node = mathLatexParser.parse("1+2");
-// { type: "operator", args: [...], operatorType: "infix" }
-console.log(node.hasChild({ type: "number", value: 1 }));
-// true
-```
-
-### Node.prototype.hasChildR(props: Object, checkArgs=false)
-
-The same as `hasChild`, but recursively.
-
-```js
-let node = mathLatexParser.parse("\\sin(1+2)");
-// { type: "function", name: "sin", args: [...], isBuiltin: true }
-console.log(node.hasChildR({ type: "number", value: 1 }));
-// true
-```
-
-### Node.types
-
-Available values for `Node.prototype.type`.
-
-Array of literal strings: `Node.types.values`.
-
-All Valid operators: `Node.types.operators`.
-
-## Options
-
-### .autoMult
-
-Type = `boolean`, default = `true`.
-
-You can parse some thing like this `3^6cd\sqrt af`, if false, the previous latex expression will throw an error while being parsed.
-
-### .functions
-Type = `Array<`[Checker](#checker)`>`, default = `[]`.
-
-This is useful in some cases like, `f(x)`, or `f\left(x\right)`, the function id here is `f`.
-
-### .builtinLetters
-
-Type = `Array<`[Checker](#checker)`>`, default:
-
-```json
-[
-  "alpha", "Alpha", "beta", "Beta", "gamma",
-  "Gamma", "pi", "Pi", "varpi", "phi", "Phi",
-  "varphi", "mu", "theta", "vartheta", "epsilon",
-  "varepsilon", "upsilon", "Upsilon", "zeta", "eta",
-  "Lambda", "lambda", "kappa","omega", "Omega",
-  "psi", "Psi", "chi", "tau", "sigma", "Sigma",
-  "varsigma", "rho", "varrho", "Xi", "xi", "nu",
-  "imath", "jmath", "ell", "Re", "Im", "wp", "Nabla",
-  "infty", "aleph", "beth", "gimel", "comicron",
-  "iota", "delta", "thetasym", "omicron", "Delta",
-  "Epsilon", "Zeta", "Eta", "Theta", "Iota", "Kappa",
-  "Mu", "Nu", "Omicron", "Rho", "Tau", "Chi", "infty",
-  "infin", "nabla", "mho", "mathsterling", "surd",
-  "diamonds", "Diamond", "hearts", "heartsuit", "spades",
-  "spadesuit", "clubsuit", "clubs", "bigstar", "star",
-  "blacklozenge", "lozenge", "sharp", "maltese", "blacksquare",
-  "square", "triangle", "blacktriangle"
-]
-```
-
-If you want to expand the defaults put `"..."` as the first item in the array, at index `0`.
-
-### .builtinFunctions
-
-Type = `Array<`[Checker](#checker)`>`, default:
-
-```json
-[
-  "sinh", "cosh", "tanh", "sin", "cos", "tan", "sec",
-  "csc", "cot", "arcsin", "arccos", "arctan", "arcsec",
-  "arccsc", "arccot", "ln"
-]
-```
-
-If you want to expand the defaults put `"..."` as the first item in the array, at index `0`.
-
-### .extra
-
-All extra features are enabled.
-
-Example:
-
-```js
-let tex = String.raw`
-  \begin{pmatrix}
-    1 & 2 \\
-    3 & 4
-  \end{pmatrix}
-`;
-mathLatexParser.parse(tex, {
+parse("...", {
+  autoMult: true,           // Allow implicit multiplication like 2x
+  keepParentheses: false,    // If true, wraps parenthesized expressions in a "parentheses" node
+  functions: ["f", "g"],    // Custom function names to prioritize
+  builtinFunctions: ["..."], // Override or extend (using "...") default TeX functions
+  builtinLetters: ["..."],   // Override or extend (using "...") default TeX Greek letters
   extra: {
-    matrices: true, // default
+    memberExpressions: true, // Allow e.g., p.x
+    sets: true,
+    matrices: true,
+    tuples: true,
+    intervals: true,
+    ellipsis: true           // Can be object for granular control (sets, matrices, etc.)
   }
 });
 ```
 
-- `memberExpressions`, for example:
-  - `p.x`
-  - `f(x).a(y).r`.
-- `intervals`: true or false, will return node with properties `{ startInlusive: boolean, endInclusive: boolean }`.
-  - `[1,2]`
-  - `(-.5, \infin)`
-  - `(-pi, 1]`
-  - `[2,5)`
-- `sets`: e.g., `\big{ 1, \sqrt \pi, ..., \left(\sqrt \pi\right)^10 \big}`
-- `tuples`: e.g., `(1, 2, x, ...)`
-- `matrices`: e.g., `\begin{matrix} ... \end{matrix}`
-- `ellipsis`: to allow the 3-dots "...", e.g., `\{{ 1, 3, 5, ... \}}`
+---
 
-----------------------
+## API: The `Node` Class
 
-Notes
+Every parsed node is an instance of the `Node` class.
 
-- You can use ellipsis as valid `Factor`, e.g., `1 + 2 + ... + 10`
-- This expression will throw syntax error, `1 + 2 + (...) + 10`
-- `extra.ellipsis` is more customizable:
-  - `extra.ellipsis.matrices: boolean`
-  - `extra.ellipsis.tuples: boolean`
-  - `extra.ellipsis.sets: boolean`
-  - `extra.ellipsis.funcArgs: boolean`, to be used as a function argument.
-  
-- Intervals, should have 2 terms as math expression:
-  - `(..., a]`: throw syntax error.
-  - `(..., a)`: is a tuple.
+### Properties
+- `node.type`: The type of the node (e.g., `"number"`, `"id"`, `"operator"`, `"function"`).
+- `node.args`: An array of child nodes (if any).
+- `node.name`: For identifiers, functions, and operators.
+- `node.value`: For numbers.
 
+### Methods
 
-### Checker
+#### `node.check(props, checkArgs = false)`
+Checks if the node matches the provided properties.
+```js
+node.check({ type: "operator", name: "+" });
+```
 
-```ts
-type Checker = RegExp | ((...args:any[])=>boolean) | Checker[];
+#### `node.contains(props, checkArgs = false)`
+Recursively checks if the node or any of its descendants match the properties. This is the recommended way to search the tree.
+```js
+// Check if an expression contains any variable named "x"
+ast.contains({ type: "id", name: "x" });
+
+// Check if there is any addition anywhere in the tree
+ast.contains({ type: "operator", name: "+" });
+```
+
+#### `node.checkType(type)`
+Syntactic sugar for `node.type === type`, but with safety. It will throw an error if the `type` string provided is not one of the valid [Node types](#nodetypes).
+```js
+node.checkType("operator"); // true or false
+node.checkType("invalid_type"); // Throws Error
+```
+
+### Node Types
+
+The available types are accessible via `Node.types`:
+- `Node.types.NUMBER` (`"number"`)
+- `Node.types.ID` (`"id"`)
+- `Node.types.OPERATOR` (`"operator"`)
+- `Node.types.FUNCTION` (`"function"`)
+- `Node.types.FRAC` (`"frac"`)
+- ... and more.
+
+---
+
+## Contribute
+
+We love open-source! Feel free to suggest AST improvements or performance enhancements.
+
+```bash
+npm install
+npm run build:watch   # Watch and build
+npm run test:watch    # Run tests on changes
 ```
 
 ## License

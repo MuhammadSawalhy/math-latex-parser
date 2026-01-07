@@ -5,71 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0] - Unreleased
+## [3.0.0] - 2026-01-07
 
-### Breaking
-
-- Remove `options.operatorNames`, all names inside `\operatorname` are valid, you have to do extra validations if you want.
-- Remove `options.singleCharName`, latex conventionally uses single-char name for constants and variables.
-- Rename `builtIn`, the `I` into `i` in all places. For example `options.buitInFunctions` into `options.builtinFunctions`.
-- `builtInControlSeq` rename to `builtinLetters`
+### Breaking Changes
+- **Operator Precedence**: Unary prefix operators (`+`, `-`, `\pm`, etc.) now bind tighter than multiplication.
+  - Example: `-a * b` is now parsed as `(-a) * b` instead of `-(a * b)`.
+- **API Change**: `Node.prototype.hasChild` and `Node.prototype.hasChildR` have been removed in favor of `Node.prototype.contains`.
+- **Renamed Option**: `keepParen` parser option has been renamed to `keepParentheses`.
+- **Internal Grammar**: All grammar rules were refactored to use PascalCase (e.g., `Operation1` -> `AdditionAndSubtraction`).
 
 ### Added
+- **New Prefix Operators**: Added support for `\pm`, `\mp`, `\neg`, and `\lnot` in prefix positions.
+- **Recursive Prefix Support**: Support for multiple prefix operators like `--x`.
+- **Improved Validation**: Added more robust checks for built-in TeX operators.
 
-- `Node.prototype.hasChild`
-- `Node.prototype.hasChildR`
-- New AST Node `"member expression"`.
-- New AST Node `"set"`.
-- New AST Node `"tuple"`.
-- `"..."`, at the beginning of options array that has default value of type `Checker`. This ellipsis will put the default ones. 
-- `options.extra`
-  - `memberExpressions`
-  - `sets`
-  - `tuples`
-  - `intervals`
-  - `matrices`
-  - `ellipsis`
-    - `sets`
-    - `tuples`
-    - `intervals`
-    - `funcArgs`
-    - `infixOperators`
+## [2.2.2] - 2026-01-07
+### Changed
+- Minor bug fixes and security updates.
+
+## [2.2.1] - 2026-01-07
+### Changed
+- Internal release updates.
+
+## [2.2.0] - 2021-02-01
+### Added
+- Enhanced `Node.prototype.check`.
+- Fixed `\operatorname` issues.
+
+## [2.1.1] - 2021-02-01
+### Fixed
+- Parcel bundler configuration fixes.
+
+## [2.1.0] - 2021-02-01
+### Added
+- Support for browser-side bundling.
+
+## [2.0.0] - 2021-02-01
+### Breaking
+- Remove `options.operatorNames`.
+- Remove `options.singleCharName`.
+- Rename `builtIn` to `builtin` (e.g., `builtinFunctions`).
+- `builtInControlSeq` renamed to `builtinLetters`.
+
+### Added
+- `Node.prototype.hasChild` and `Node.prototype.hasChildR`.
+- New AST Nodes: `"member expression"`, `"set"`, `"tuple"`.
+- `options.extra` features.
 
 ## [1.2.1] - 2020-10-25
-
-### Fix
-
-- Fix the issue (#1).
+### Fixed
+- Fix issue (#1).
 
 ## [1.2.0] - 2020-10-22
-
-### Fix
-
-- Catch error more precisely when unexpected block closing char found
-
-## [1.1.1] - 2020-9-3
-
-### Added
-
-- Add files property in package.json to reduce the package size, and delete the development files.
-
-## [1.1.0] - 2020-9-3
-
-### Added
-
-- Tests for the basic arithmetics and autoMult option
-- Tests for options.functions
-- Preparing input before parsing, enabling parsing when the passed expression has some unimportant groups such as `as{da } ^{13}{/6}` -> `as da   ^{13} /6 `
-- Types "prod", "sqrt" to Node types.
-
-
-### Changed
-
-- the error message when parsing `\dfhgw`, which is not defined, the parser throw "undefined control sequence dfhgw";
-- Sqrt now is parsed with type = "sqrt" not "function" as before.
-
-### Fix
-
-- `\lef( [expression] \right)`: an error was thrown when we try to parse such an expression, it considered right as control sequence name
-- Make the argument for BlockParentheses instance of Array
-
+### Fixed
+- Catch error more precisely when unexpected block closing char found.
