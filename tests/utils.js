@@ -119,10 +119,9 @@ class NodeCreator {
   }
 
   paren(args) {
-    // frac
     if (!Array.isArray(args))
-      this.invalidArgs("parenthese");
-    return { type: "parenthese", args };
+      this.invalidArgs("parentheses");
+    return { type: "parentheses", args };
   }
 
   abs(args) {

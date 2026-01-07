@@ -107,7 +107,7 @@ Node.types.values = Object.values(Node.types);
 Node.types.operators = {
   infix: ["^", "*", "/", "+", "-", "=", "cdot"],
   postfix: ["!"],
-  prefix: ["-", "+"],
+  prefix: ["-", "+", "pm", "mp", "neg", "lnot"],
 };
 
 Node.types.blocks = [

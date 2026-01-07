@@ -4,6 +4,7 @@ const autoMult = require('./autoMult');
 const memExpr = require('./memExpr');
 const extra = require('./extra');
 const operatorsPrecedence = require('./operatorsPrecedence');
+const options = require('./options');
 
 let tests = {
   basic,
@@ -12,6 +13,7 @@ let tests = {
   operatorsPrecedence,
   memExpr,
   extra,
+  options,
 };
 
 module.exports = tests;

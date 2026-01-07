@@ -97,5 +97,25 @@ module.exports = [
     tex: "--x",
     struct: node.preOP("-", [node.preOP("-", ["x"])]),
   },
+  {
+    title: "should parse: prefix \\pm",
+    tex: "\\pm x",
+    struct: node.preOP("pm", ["x"]),
+  },
+  {
+    title: "should parse: prefix \\mp",
+    tex: "\\mp x",
+    struct: node.preOP("mp", ["x"]),
+  },
+  {
+    title: "should parse: prefix \\neg",
+    tex: "\\neg x",
+    struct: node.preOP("neg", ["x"]),
+  },
+  {
+    title: "should parse: prefix \\lnot",
+    tex: "\\lnot x",
+    struct: node.preOP("lnot", ["x"]),
+  }
 ];
 
