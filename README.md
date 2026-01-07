@@ -149,6 +149,14 @@ npm run build:watch   # Watch and build
 npm run test:watch    # Run tests on changes
 ```
 
+## Roadmap
+
+- [ ] Support for parsing comments (e.g., `%`).
+- [ ] IDs decoration (e.g., `\vec{F}`, `\dot{a}`).
+- [ ] Improved ellipsis handling variants: `1 + ... + 4`, `1 + \cdot\cdot\cdot + 4`, `1 + \cdots + 4`.
+
+---
+
 ## License
 
 MIT

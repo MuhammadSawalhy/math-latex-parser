@@ -1,7 +1,3 @@
-// TODO: parse comments such as % for commenting line
-// TODO: IDs decoration: `\vec{F}`,`\dot{a}`
-// TODO: IDs decoration: `\vec{F}`,`\dot{a}`
-// TODO: 3 dots: `1 + ... + 4` or => `1 + \sdot\sdot\sdot + 4`
 
 {
   {
