@@ -1,6 +1,6 @@
 {
 	"name": "@scicave/math-latex-parser",
-	"version": "2.2.0",
+	"version": "2.2.1",
 	"description": "A mathematical (La)TeX parser.",
 	"main": "./lib/index.js",
 	"targets": {
@@ -19,7 +19,9 @@
 			"outputFormat": "global"
 		}
 	},
-	"files": ["lib"],
+	"files": [
+		"lib"
+	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/MuhammadSawalhy/math-latex-parser.git"
@@ -30,7 +32,7 @@
 	"homepage": "https://github.com/MuhammadSawalhy/math-latex-parser#readme",
 	"scripts": {
 		"test": "jest",
-		"lint": 	"eslint ./src/ --fix",
+		"lint": "eslint ./src/ --fix",
 		"debug": "node debug.js",
 		"start": "npm run build:watch",
 		"build": "node generate-version-file.js && node build.js",
