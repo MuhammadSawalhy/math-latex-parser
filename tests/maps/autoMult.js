@@ -1,4 +1,4 @@
-const { node } = require("./utils");
+const { node } = require("../utils");
 
 module.exports = [
   {
@@ -10,12 +10,14 @@ module.exports = [
 
   {
     tex: "-.123^6cd\\sqrt af",
-    struct: node.am([
+    struct: node.preOP("-", [
       node.am([
-        node.am([node.am([node.op("^", [-0.123, 6]), "c"]), "d"]),
-        node.sqrt(["a"]),
-      ]),
-      "f",
+        node.am([
+          node.am([node.am([node.op("^", [0.123, 6]), "c"]), "d"]),
+          node.sqrt(["a"]),
+        ]),
+        "f",
+      ])
     ]),
   },
 

@@ -68,7 +68,7 @@ expect.extend({
         }
         for (let i = 0; i < s.length; i++) {
           if (typeof n[i] !== 'object')
-            if(n[i] !== s[i]) return failed(`${nPath}[${i}] !== ${sPath}[${i}]`);
+            if (n[i] !== s[i]) return failed(`${nPath}[${i}] !== ${sPath}[${i}]`);
             else continue;
           let c = _check(n[i], s[i], nPath + `[${i}]`, sPath + `[${i}]`);
           if (c) return c; // here a problem is found
@@ -109,7 +109,7 @@ function getTitle(__test) {
   if (__test.Title) return __test.Title;
   // return tex.replace(/\n/g, '\\n');
   let mkt = (m) => `\n\t\t\t${JSON.stringify(m)}`;
-  if (__test.title) { 
+  if (__test.title) {
     let t = mkt(__test.tex);
     return __test.title + t;
   }
@@ -123,7 +123,7 @@ function getTitle(__test) {
 // otherwise this is a group to pack
 // inside `jest.describe` 
 function doTest(on, title) {
-  describe(title, ()=>{
+  describe(title, () => {
     if (on instanceof Array) {
       on.forEach((__test) => {
         // to be the 1st arg of jest.test
@@ -132,10 +132,10 @@ function doTest(on, title) {
         let fn = () => {
           // expect to throw
           if (__test.error) {
-            expect(()=>parser.parse(__test.tex, __test.parserOptions)).toThrow(
+            expect(() => parser.parse(__test.tex, __test.parserOptions)).toThrow(
               __test.errorType === "syntax" ? parser.SyntaxError :
-              __test.errorType === "options" ? parser.OptionsError :
-              __test.errorType
+                __test.errorType === "options" ? parser.OptionsError :
+                  __test.errorType
             );
           }
           // expect to pass
@@ -143,7 +143,7 @@ function doTest(on, title) {
             expect(parser.parse(__test.tex, __test.parserOptions)).toHaveStructure(__test.struct);
           }
         };
-        if (__test.only) 
+        if (__test.only)
           test.only(title, fn);
         else if (!__test.skip)
           test(title, fn);
@@ -152,7 +152,7 @@ function doTest(on, title) {
       for (let p in on) {
         doTest(on[p], p);
       }
-    } else { 
+    } else {
       throw new Error('can\'t do tests on ' + typeof on);
     }
   });

@@ -8,7 +8,7 @@ class NodeCreator {
     throw new Error("Invalid argument passed to: ") + fname;
   }
 
-  id(name, extra={}) {
+  id(name, extra = {}) {
     // builtin function
     if (
       typeof name !== "string" ||
@@ -18,7 +18,7 @@ class NodeCreator {
     return { type: "id", name, ...extra };
   }
 
-  num(value, extra={}) {
+  num(value, extra = {}) {
     // builtin function
     if (
       typeof value !== "number" ||
@@ -98,6 +98,16 @@ class NodeCreator {
     return { type: "operator", name, args, operatorType: "postfix" };
   }
 
+  preOP(name, args) {
+    // prefix operator
+    if (
+      typeof name !== "string" ||
+      !Array.isArray(args)
+    )
+      this.invalidArgs("prefix operator");
+    return { type: "operator", name, args, operatorType: "prefix" };
+  }
+
   am(args) {
     if (!Array.isArray(args)) this.invalidArgs("automult");
     return { type: "automult", args };
@@ -135,7 +145,7 @@ class NodeCreator {
       !Array.isArray(args) ||
       args.length !== 2 ||
       typeof extra !== "object"
-    ) { this.invalidArgs("interval") }
+    ) { this.invalidArgs("interval"); }
     return { type: "interval", args, ...extra };
   }
 
@@ -144,7 +154,7 @@ class NodeCreator {
       !Array.isArray(args) ||
       args.find((i) => !Array.isArray(i)) ||
       typeof extra !== "object"
-    ) { this.invalidArgs("matrix") }
+    ) { this.invalidArgs("matrix"); }
     return { type: "matrix", args, ...extra };
   }
 }

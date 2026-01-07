@@ -211,50 +211,55 @@
   }
 }
 
-Expression "expression" = _ expr:Operation1 _ { return expr; }
+Expression "expression" = OptionalWhitespace expr:EquationsAndInequalities OptionalWhitespace { return expr; }
 
-Operation1 =
-  head:Operation2 tail:(_ ("=" / "\\" a:texOperators1 { return a }) _ Operation2)* _{
+EquationsAndInequalities =
+  head:AdditionAndSubtraction tail:(OptionalWhitespace ("=" / "\\" a:TexOperatorsTitles { return a }) OptionalWhitespace AdditionAndSubtraction)* OptionalWhitespace {
     return tail.reduce(function(result, element) {
       return createNode("operator" , [result, element[3]], { name: element[1], operatorType: 'infix' });
     }, head);
   }
 
-texOperators1 =
-  w:word
+TexOperatorsTitles =
+  w:Word
   &{ return w in texOperators1 }
   { return w }
 
-Operation2 =
-  head:Operation3 tail:(_ ("+" / "-") _ Operation3)* {
+AdditionAndSubtraction =
+  head:MultiplicationAndDivision tail:(OptionalWhitespace ("+" / "-") OptionalWhitespace MultiplicationAndDivision)* {
     return tail.reduce(function(result, element) {
       return createNode("operator" , [result, element[3]], { name: element[1], operatorType: 'infix' });
     }, head);
   }
 
-Operation3 =
-  head:Operation4 tail:(_ ("*" / "/" / "\\cdot" !char { return "cdot"; }) _ Operation4)* {
+MultiplicationAndDivision =
+  head:UnaryPrefixOperation tail:(OptionalWhitespace ("*" / "/" / "\\cdot" !Letter { return "cdot"; }) OptionalWhitespace UnaryPrefixOperation)* {
     return tail.reduce(function(result, element) {
       return createNode("operator" , [result, element[3]], { name: element[1], operatorType: 'infix' });
     }, head);
   }
 
-Operation4 =
-  head:(Operation5) tail:(_ Operation5WithoutNumber)* {
+UnaryPrefixOperation =
+  sign:("-" / "+") OptionalWhitespace operand:UnaryPrefixOperation {
+    return createNode("operator", [operand], { name: sign, operatorType: 'prefix' });
+  } / ImplicitMultiplication
+
+ImplicitMultiplication =
+  head:(PowerAndFactorial) tail:(OptionalWhitespace PowerAndFactorialWithoutNumber)* {
     return tail.reduce(function(result, element) {
       return createNode("automult" , [result, element[1]]);
     }, head);
   }
 
-Operation5 =
-  base:Factor _ exp:SuperScript? _ fac:factorial? {
+PowerAndFactorial =
+  base:Factor OptionalWhitespace exp:SuperScript? OptionalWhitespace fac:"!"? {
     if (exp) base = new Node("operator", [base, exp], { name: '^', operatorType: 'infix' });
     if (fac) base = new Node("operator", [base], { name: '!', operatorType: 'postfix' });
     return base;
   }
 
-Operation5WithoutNumber =
-  base:FactorNotNumber _ exp:SuperScript? _ fac:factorial? {
+PowerAndFactorialWithoutNumber =
+  base:FactorNotNumber OptionalWhitespace exp:SuperScript? OptionalWhitespace fac:"!"? {
     if (exp) base = new Node("operator", [base, exp], { name: '^', operatorType: 'infix' });
     if (fac) base = new Node("operator", [base], { name: '!', operatorType: 'postfix' });
     return base;
@@ -270,9 +275,9 @@ FactorNotNumber =
   Matrix/ Block_VBars / TexEntities
 
 Block_VBars =
-  ("\\big"/ "\\Big"/ "\\bigg"/ "\\Bigg"/ "\\left") _ "|"
+  ("\\big"/ "\\Big"/ "\\bigg"/ "\\Bigg"/ "\\left") OptionalWhitespace "|"
   e:Expression
-  ("\\big"/ "\\Big"/ "\\bigg"/ "\\Bigg"/ "\\right") _ "|"
+  ("\\big"/ "\\Big"/ "\\bigg"/ "\\Bigg"/ "\\right") OptionalWhitespace "|"
   {
     return createNode("abs", [e]);
   }
@@ -285,8 +290,8 @@ Functions "functions" =
   BuiltinFunctions / Operatorname / Function
 
 BuiltinFunctions "builtin functions" =
-  "\\" name:builtinFuncsTitles
-  _ exp:SuperScript? _ args:builtinFunctionsArgs
+  "\\" name:BuiltinFuncsTitles
+  OptionalWhitespace exp:SuperScript? OptionalWhitespace args:BuiltinFunctionsArgs
   {
     if (!Array.isArray(args)) args = [args];
     let func = new Node('function', args, {name, isBuiltin:true});
@@ -294,39 +299,39 @@ BuiltinFunctions "builtin functions" =
     else return createNode("operator", [func, exp], { name: '^', operatorType: 'infix' });
   }
 
-builtinFuncsTitles =
-  name:word
+BuiltinFuncsTitles =
+  name:Word
   &{ return check(name, options.builtinFunctions) }
   {
     return name;
   }
 
-builtinFunctionsArgs = functionParentheses / Operation4
+BuiltinFunctionsArgs = FunctionParentheses / ImplicitMultiplication
 
 Operatorname =
   "\\operatorname"
   name:(
-    _ "{" _ name:(Name/SpecialSymbols) _ "}" { return name } /
-    ws+ name:(Name/SpecialSymbols) { return name }
-  ) _ args:functionParentheses
+    OptionalWhitespace "{" OptionalWhitespace name:(Name/SpecialSymbols) OptionalWhitespace "}" { return name } /
+    Whitespace+ name:(Name/SpecialSymbols) { return name }
+  ) OptionalWhitespace args:FunctionParentheses
   {
     return createNode("operatorname", args, { name });
   }
 
 Function =
   name:$Name
-  &{ return check(name, options.functions) } _
-  args:functionParentheses
+  &{ return check(name, options.functions) } OptionalWhitespace
+  args:FunctionParentheses
   { return createNode('function', args, { name }); }
 
-functionParentheses =
+FunctionParentheses =
   &{ doesContainEllipsis.push(false); return true }
   // open parenthese
-  ("\\big"/ "\\Big"/ "\\bigg"/ "\\Bigg"/ "\\left")? _ "("
+  ("\\big"/ "\\Big"/ "\\bigg"/ "\\Bigg"/ "\\left")? OptionalWhitespace "("
   // function actual args
   a:CommaExpression // there is spaces around it, not need for _
   // close parenthese
-  ("\\big"/ "\\Big"/ "\\bigg"/ "\\Bigg"/ "\\right")? _ ")"
+  ("\\big"/ "\\Big"/ "\\bigg"/ "\\Bigg"/ "\\right")? OptionalWhitespace ")"
   {
     let __doesContainEllipsis = doesContainEllipsis.pop();
     let ellipsis = options.extra.ellipsis;
@@ -338,7 +343,7 @@ functionParentheses =
   /
   // fallback when the previous grammar doesn't match
   &{ doesContainEllipsis.pop(); return true }
-  "(" _ ")" { return [] };
+  "(" OptionalWhitespace ")" { return [] };
 
 // there is spaces around expressions already no need for _ rule
 CommaExpression =
@@ -356,15 +361,15 @@ CommaExpression =
 
 // put spaces around '...' here, use it directly there
 Ellipsis =
-  _ type:("..." / "\\" t:dots { return t }) _
+  OptionalWhitespace type:("..." / "\\" t:DotsRule { return t }) OptionalWhitespace
   { return createNode("ellipsis", null, { type }) }
 
 // put spaces around '...' here, use it directly there
-HorizentalEllipsis =
-  _ type:("..." / "\\" t:("dots" / "cdots") { return t }) _
+HorizontalEllipsis =
+  OptionalWhitespace type:("..." / "\\" t:("dots" / "cdots") { return t }) OptionalWhitespace
   { return createNode("ellipsis", null, { type }) }
 
-dots = "dots" / "vdots" / "ddots" / "cdots"
+DotsRule = "dots" / "vdots" / "ddots" / "cdots"
 
 CommaExpressionEllipsis = e:Ellipsis {
   doesContainEllipsis[doesContainEllipsis.length - 1] = true;
@@ -376,24 +381,24 @@ CommaExpressionEllipsis = e:Ellipsis {
 // -----------------------------------
 
 TupleOrExprOrParenOrIntervalOrSet =
-  o:blockOpeningsss
+  o:BlockOpenings
   // reset then continue
   &{ doesContainEllipsis.push(false); return true }
   arr1dOrExpr:CommaExpression
-  c:blockClosingsss
+  c:BlockClosings
   {
     return handleBlock(arr1dOrExpr, o, c);
   }
   // fallback action, pop the last item
   / &{ doesContainEllipsis.pop(); return false } "a"
 
-blockOpeningsss =
-  leftPrefixes? _
+BlockOpenings =
+  leftPrefixes? OptionalWhitespace
   a:("(" / "[" / "{" / "\\{{" / "\\{")
   { return a.length > 1 ? a[1] : a; }
 
-blockClosingsss =
-  rightPrefixes? _
+BlockClosings =
+  rightPrefixes? OptionalWhitespace
   a:(")" / "]" / "}" / "\\}}" / "\\}")
   { return a.length > 1 ? a[1] : a; }
 
@@ -404,17 +409,17 @@ blockClosingsss =
 TexEntities =
     SpecialTexRules / SpecialSymbols
 
-SpecialSymbols = "\\" name:specialSymbolsTitles !char {
-  return createNode('id', null, { name, isBuiltin:true })
+SpecialSymbols = "\\" name:SpecialSymbolsTitles !Letter {
+  return createNode('id', null, { name: name, isBuiltin:true })
 }
 
 /// this may be operator, if so, don't consider as specialSymbol
-specialSymbolsTitles =
+SpecialSymbolsTitles =
   // no need to !AnyThingElse such as dots ("ddots", "dots", "cdots", ...)
   // because this is the last checked Factor
-  !(texOperators1 !char)
-  !(leftPrefixes !char)
-  name:word &{
+  !(TexOperatorsTitles !Letter)
+  !(leftPrefixes !Letter)
+  name:Word &{
     return !check(name, [
       "begin", "end", "right" /* for rightPrefixes */,
       "cdot", "operatorname"
@@ -434,29 +439,28 @@ specialSymbolsTitles =
 SpecialTexRules = Sqrt / IntSumProd / Frac
 
 Sqrt =
-  "\\sqrt" !char _
-  exp:SquareBrackets? _
+  "\\sqrt" !Letter OptionalWhitespace
+  exp:SquareBrackets? OptionalWhitespace
   arg:Arg
   {
     // exp = exp || createNode("number", null, {value:2});
     return exp ? createNode("sqrt", [arg, exp]) : createNode("sqrt", [arg]);
   }
 
-IntSumProd = "\\" n:("int" / "sum" / "prod") !char _
+IntSumProd = "\\" n:("int" / "sum" / "prod") !Letter OptionalWhitespace
         subsup:(
-          &(_ "_") sub:SubScript? _ sup:SuperScript? { return [sub, sup]; } /
-          sup:SuperScript? _ sub:SubScript? { return [sub, sup]; }
-        ) _ arg:Expression
+          &(OptionalWhitespace "_") sub:SubScript? OptionalWhitespace sup:SuperScript? { return [sub, sup]; } /
+          sup:SuperScript? OptionalWhitespace sub:SubScript? { return [sub, sup]; }
+        ) OptionalWhitespace arg:EquationsAndInequalities
   {
     subsup.push(arg);
     return createNode(n, subsup);
   }
-
-Frac = "\\frac" !char _
-  args:(first:Arg _ second:Arg { return [first, second]; })
+Frac = "\\frac" !Letter OptionalWhitespace
+  args:(first:Arg OptionalWhitespace second:Arg { return [first, second]; })
   { return createNode("frac", args); }
 
-oneCharArg "digit or char" = w {
+OneCharArg "digit or char" = Alphanumeric {
     let txt = text();
     if(isNaN(txt)){
       return createNode("id", null, { name: txt });
@@ -470,9 +474,9 @@ oneCharArg "digit or char" = w {
 // -----------------------------------
 
 Matrix =
-  "\\begin" _ "{" _ t1:word _ "}" _
-  rows:matrixRows _
-  "\\end" _ "{" t2:word "}"
+  "\\begin" OptionalWhitespace "{" OptionalWhitespace t1:Word OptionalWhitespace "}" OptionalWhitespace
+  rows:MatrixRows OptionalWhitespace
+  "\\end" OptionalWhitespace "{" t2:Word "}"
   {
     if(t1 !== t2)
       error(`different titles: \\begin{${t1}} and \\end{${t2}}`);
@@ -485,15 +489,15 @@ Matrix =
     return createNode("matrix", rows, { matrixType: t1 });
   }
 
-matrixRows =
-  head:matrixRow tail:(_ "\\\\" _ matrixRow)* {
+MatrixRows =
+  head:MatrixRow tail:(OptionalWhitespace "\\\\" OptionalWhitespace MatrixRow)* {
     tail = tail.map(n=>n[3])
     tail.unshift(head);
     return tail;
   }
 
-matrixRow =
-  head:Expression tail:(_ "&" _ Expression)* {
+MatrixRow =
+  head:EquationsAndInequalities tail:(OptionalWhitespace "&" OptionalWhitespace EquationsAndInequalities)* {
     tail = tail.map(n=>n[3])
     tail.unshift(head);
     return tail;
@@ -506,7 +510,7 @@ matrixRow =
 
 MemberExpression =
   // left to right
-  head:(memberArg / TupleOrExprOrParenOrIntervalOrSet) tail:(_ "."  _ memberArg)* {
+  head:(MemberArg / TupleOrExprOrParenOrIntervalOrSet) tail:(OptionalWhitespace "."  OptionalWhitespace MemberArg)* {
     // reduce from left to right, ltr
     return tail.reduce(function(result, element) {
       return createNode("member expression" , [result, element[3]]);
@@ -514,60 +518,60 @@ MemberExpression =
   }
 
 // not member expression
-memberArg = Functions / Name
+MemberArg = Functions / Name
 
 // -----------------------------------
 //             names
 // -----------------------------------
 
 Name "name" =
-  name:char sub:subName?
+  name:Letter sub:SubName?
   {
     let n = createNode('id', null, {name})
     if (sub) n.sub = sub;
     return n;
   }
 
-subName =
-  _ "_" _ w:w { return createNode("id", null, { name: w }) } /
-  _ "_" _ "{" _ n:Name _ "}" { return n }
+SubName =
+  OptionalWhitespace "_" OptionalWhitespace w:Alphanumeric { return createNode("id", null, { name: w }) } /
+  OptionalWhitespace "_" OptionalWhitespace "{" OptionalWhitespace n:Name OptionalWhitespace "}" { return n }
 
-w "letter or number"  = [a-zA-Z0-9]
+Alphanumeric "letter or number"  = [a-zA-Z0-9]
 
-char "letter"  = [a-zA-Z]
+Letter "letter"  = [a-zA-Z]
 
-word = [a-zA-Z]+ { return text() }
+Word = [a-zA-Z]+ { return text() }
 
 // -----------------------------------
 //             numbers
 // -----------------------------------
 
 Number "number"
-  = sign:sign? _ $simpleNumber {
+  = sign:Sign? OptionalWhitespace $SimpleNumber {
     let value = parseFloat(text().replace(/[ \t\n\r]/g, ''));
     return createNode('number', null, {value});
   }
 
-simpleNumber "number"
-  = (num:[0-9]([0-9]/ws)* frac? / frac)
+SimpleNumber "number"
+  = (num:[0-9]([0-9]/Whitespace)* DecimalPart? / DecimalPart)
 
-frac
-  = "." _ [0-9]([0-9]/ws)*
+DecimalPart
+  = "." OptionalWhitespace [0-9]([0-9]/Whitespace)*
 
-sign
+Sign
   = '-' / '+'
 
 // -----------------------------------
 //              atoms
 // -----------------------------------
 
-SquareBrackets = "[" _ expr:Expression "]" { return expr; }
-CurlyBrackets = "{" _ expr:Expression "}" { return expr; }
+SquareBrackets = "[" OptionalWhitespace expr:EquationsAndInequalities "]" { return expr; }
+CurlyBrackets = "{" OptionalWhitespace expr:EquationsAndInequalities "}" { return expr; }
 
-SuperScript "superscript" = "^" _ arg:(Arg) {return arg;}
-SubScript "subscript" = "_" _ arg:(Arg) {return arg;}
+SuperScript "superscript" = "^" OptionalWhitespace arg:(Arg) {return arg;}
+SubScript "subscript" = "_" OptionalWhitespace arg:(Arg) {return arg;}
 
-Arg "function argument" = CurlyBrackets / Frac / SpecialSymbols / oneCharArg
+Arg "function argument" = CurlyBrackets / Frac / SpecialSymbols / OneCharArg
 
 leftPrefixes = ("\\left" / "\\Big" / "\\Bigg" / "\\big" / "\\bigg")
 rightPrefixes = ("\\right" / "\\Big" / "\\Bigg" / "\\big" / "\\bigg")
@@ -576,10 +580,10 @@ rightPrefixes = ("\\right" / "\\Big" / "\\Bigg" / "\\big" / "\\bigg")
 //            primitives
 // -----------------------------------
 
-factorial = "!"
+FactorialRule = "!"
 
-nl "newline"      = "\n" / "\r\n"
-sp "space or tab" = " "  / "\t"
-escapedSpace      = "\\ "
-ws "whitespace"   = nl / sp / escapedSpace
-_ "whitespace"    = ws*
+Newline "newline"      = "\n" / "\r\n"
+Space "space or tab" = " "  / "\t"
+EscapedSpace      = "\\ "
+Whitespace "whitespace"   = Newline / Space / EscapedSpace
+OptionalWhitespace "whitespace"    = Whitespace*

@@ -3,13 +3,15 @@ const functions = require('./functions');
 const autoMult = require('./autoMult');
 const memExpr = require('./memExpr');
 const extra = require('./extra');
+const operatorsPrecedence = require('./operatorsPrecedence');
 
 let tests = {
   basic,
   autoMult,
   functions,
-  "member expression": memExpr,
-  "extra feature": extra,
+  operatorsPrecedence,
+  memExpr,
+  extra,
 };
 
 module.exports = tests;

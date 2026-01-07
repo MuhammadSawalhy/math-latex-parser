@@ -1,4 +1,4 @@
-const { node } = require('./utils');
+const { node } = require('../utils');
 
 module.exports = [
 
@@ -15,7 +15,7 @@ module.exports = [
   {
     tex: `f(x)`,
     parserOptions: { functions: "f" },
-    struct: node.F("f",["x"]),
+    struct: node.F("f", ["x"]),
   },
 
   {
@@ -28,7 +28,7 @@ module.exports = [
     tex: '\\operatorname \\theta(1)',
     struct: node.opname(
       node.id("theta", { isBuiltin: true }),
-      [1]  
+      [1]
     )
   },
 
@@ -36,7 +36,7 @@ module.exports = [
     tex: '\\operatorname {\\theta} (1)',
     struct: node.opname(
       node.id("theta", { isBuiltin: true }),
-      [1]  
+      [1]
     )
   },
 
