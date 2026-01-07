@@ -21,13 +21,12 @@ const ast = parse('1 + 2 * 3^2');
 // Complex LaTeX
 const tex = String.raw`\int_{0}^{\pi} \sin(x) dx + \frac{1}{2}`;
 const ast2 = parse(tex);
+```
 
-### Visualizing the AST
 
 For an expression like `12+3^6x \frac 1 {5+3}`, the parser generates a structured tree:
 
 ![AST](./assets/AST.png)
-```
 
 ### Browser
 
