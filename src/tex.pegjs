@@ -1,16 +1,7 @@
 // TODO: parse comments such as % for commenting line
-// TODO: Parse MemberExpression
-// TODO: sets, { 1,2, ...,3 }
-// TODO: tuples, ( 1,2, , , ...,3 )
-// TODO: intervals, [1, 2)
-// TODO: matrices, \begin{bmatrix} 1 & 2 & 3 \end{bmatrix}
 // TODO: IDs decoration: `\vec{F}`,`\dot{a}`
 // TODO: IDs decoration: `\vec{F}`,`\dot{a}`
 // TODO: 3 dots: `1 + ... + 4` or => `1 + \sdot\sdot\sdot + 4`
-/**
- * Pegjs rules of the major significant parts of the exression are __PascalCased__
- * The helper rules are __camelCased__
- */
 
 {
   {

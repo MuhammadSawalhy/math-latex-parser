@@ -1,9 +1,17 @@
-const pegjs = require('pegjs');
 const fs = require('fs');
 const path = require('path');
+const pegjs = require('pegjs');
 const rimraf = require('rimraf');
 
-const dev = process.env.NODE_ENV !== 'production';
+const pkg = require('./package.json');
+const versionFilePath = './src/version.js';
+const versionFileCode = `
+// this file is auto generated
+// the current version is:
+module.exports = "${pkg.version}";
+`;
+
+fs.writeFileSync(path.resolve(__dirname, versionFilePath), versionFileCode);
 
 const pegjsOptions = {
   output: 'source',
@@ -59,7 +67,7 @@ grammarFiles.forEach(file => {
   console.log(inputPath);
   console.log();
 
-  function getParserCode () {
+  function getParserCode() {
     const grammar = fs.readFileSync(inputPath).toString('utf8');
     let code = pegjs.generate(grammar, pegjsOptions);
 
@@ -67,12 +75,6 @@ grammarFiles.forEach(file => {
     for (const r of replacements) {
       code = code.replace(r.text, r.replacement);
     }
-
-    /// here we want to replace comment with contents file
-    /** # require('./preParse.js'); */
-    code = code.replace(/\/\*\*#\s*require\s*\(\s*(?:"|')(.*?)(?:"|')\s*\)\s*;?\s*\*\//gm, (m, g) => {
-      return fs.readFileSync(path.resolve(inputDir, g)).toString('utf8');
-    });
 
     return code;
   }
@@ -101,7 +103,7 @@ grammarFiles.forEach(file => {
   console.log();
 });
 
-function prepareOutputDir (outputDir) {
+function prepareOutputDir(outputDir) {
   if (fs.existsSync(outputDir)) {
     /// delete all the output dir content
     rimraf.sync(path.resolve(outputDir, '*'));

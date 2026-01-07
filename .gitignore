@@ -1,5 +1,6 @@
 lib/
 node_modules/
+src/version.js
 .vscode
 .cache
 .parcel-cache
