@@ -21,7 +21,12 @@
 		}
 	},
 	"files": [
-		"lib"
+		"lib/",
+		"CHANGELOG.md",
+		"index.js",
+		"index.d.ts",
+		"LICENSE",
+		"README.md"
 	],
 	"repository": {
 		"type": "git",
